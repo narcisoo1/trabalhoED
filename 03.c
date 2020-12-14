@@ -23,7 +23,8 @@ void exibeLista(lista *l);
 void insereArv(arv **ar, char* valor, const int linha);
 lista* insereLista(lista *l, const int linha);
 void BuscaPalavra_ExibeCaminho(arv *ar, char *palavra);
-void split(char *str, char *strings[], int *lenStrings, char *removeStr);
+void split(char *str, char *strings[], int *lenStrings);
+void exibeArvore_Letra(arv *ar, char letra);
 
 int main(int argc, char *argv[]){
 
@@ -42,8 +43,8 @@ int main(int argc, char *argv[]){
 
 	if((fp=fopen(archiveName, "r"))){
 		for(int j = 0; (fgets(linha, 99, fp)); ++j, ++lenArquivo){ //Percorre linhas do arquivo
-			split(linha, strings, &lenStrings, NULL);
-			if(lenStrings == 0)
+			split(linha, strings, &lenStrings);
+			if(lenStrings == 0)//Caso linha em branco
 				--j;
 			for(int i = 0; i < lenStrings; ++i){ //Percorre linhas da string fatiada
 				insereArv(&ar, strings[i], j+1);
@@ -58,7 +59,12 @@ int main(int argc, char *argv[]){
 
 	fclose(fp);
 
-	exibeArvore(ar);
+//	exibeArvore(ar);
+
+
+	for(int i = 'A'; i <= 'Z'; ++i){//Exibe palavras em ordem alfabética
+		exibeArvore_Letra(ar, i);
+	}
 
 
 	printf("\nSearching for a word...\n");
@@ -69,74 +75,135 @@ int main(int argc, char *argv[]){
 
 	BuscaPalavra_ExibeCaminho(ar, buscaWord);
 
-	// if((fp = fopen(archiveName, "r"))){ //Busca palavra para remover
-	// 	int line;
-	// 	printf("\nInsert word to remove: ");
-	// 	scanf(" %s", buscaWord);
-	// 	printf("\nInsert line: ");
-	// 	scanf("%d", &line);
+	if((fp = fopen(archiveName, "r"))){ //Busca palavra para remover
+		int line;
+		printf("\nInsert word to remove: ");
+		scanf(" %s", buscaWord);
+		printf("\nInsert line: ");
+		scanf("%d", &line);
 
-	// 	if(line <= lenArquivo){ //Cria novo arquivo
-	// 		FILE *newfp;
-	// 		newfp = fopen("novo.txt", "w");
+		if(line > 0 && line <= lenArquivo){ //Testa se linha existe
+			FILE *newfp;
+			newfp = fopen("novo.txt", "w");
 			
-	// 		if(!(newfp)) //Caso não seja possível abrir 1 dos arquivos!
-	// 			exit(1);
+			if(!(newfp)) //Caso não seja possível abrir 1 dos arquivos!
+				exit(1);
 
-	// 		for(int i = 0;fgets(linha, 99, fp); ++i){
-	// 			if(i == line-1){ //Linha que a palavra supostamente existe
-	// 				if(strstr(linha, buscaWord)){ //Se a palavra existe na string
-						
-	// 					split(linha, strings, &lenStrings, buscaWord);
-						
-	// 					strcpy(linha, "");
+			for(int i = 0;fgets(linha, 99, fp); ++i){
 
-	// 					for(int j = 0; j < lenStrings; ++j){
-	// 						strncat(linha, strings[j], 99);
-	// 						strncat(linha, " ", 99);
-	// 					}
+				if(strcmp(linha, "\n") == 0){//Linha em branco
+					i--;
+				}else if(i == line-1){ //Linha que a palavra supostamente existe
+					if(strstr(linha, buscaWord)){ //Se a palavra existe na string
+						lenStrings = 0;		
+						split(linha, strings, &lenStrings);
+						char newstr[100] = {};
 
-	// 					printf("FATIA\n");
-	// 					printf("Linha: %s\n", linha);
+						for(int j = 0; j < lenStrings; ++j){
+							if(strcmp(strings[j], buscaWord) != 0){
+								strncat(newstr, strings[j], 99);
+								strncat(newstr, " ", 99);
+							}
+						}
+						strncat(newstr, "\n", 99);
+						strcpy(linha, newstr);
+					}
+				}
+				fputs(linha, newfp);
+			}
 
-	// 				}
-	// 			}
-	// 			fputs(linha, newfp);
-	// 		}
+			fclose(newfp);
 			
-	// 		//......................
+		}else
+			printf("Out of range...\n");
+	}else{
+		exit(1);
+	}
 
-	// 		fclose(newfp);
+	fclose(fp);
+
+	printf("\nAdding a word...\n");
+
+
+
+	if((fp = fopen("novo.txt", "r"))){
+		int line;
+
+		printf("word: ");
+		scanf(" %s", buscaWord);
+		
+		printf("linha: \n");
+		scanf("%d", &line);
+		
+		if(line > 0 && line <= lenArquivo){ //Testa se linha existe
 			
-	// 	}else
-	// 		printf("Out of range...\n");
-	// }else{
-	// 	exit(1);
-	// }
+			insereArv(&ar, linha, line);
+			
+			FILE *newfp;
+			newfp = fopen("novo_novo.txt", "w");
+			
+			if(!(newfp)) //Caso não seja possível abrir 1 dos arquivos!
+				exit(1);
 
-	// fclose(fp);
+			for(int i = 0;fgets(linha, 99, fp); ++i){
+
+				if(strcmp(linha, "\n") == 0){//Linha em branco
+					i--;
+				}else if(i == line-1){ //Linha para adicionar palavra
+					
+					lenStrings = 0;		
+					split(linha, strings, &lenStrings);
+					char newstr[100] = {};
+
+					for(int j = 0; j < lenStrings; ++j){
+						strncat(newstr, strings[j], 99);
+						strncat(newstr, " ", 99);
+					}
+					strncat(newstr, buscaWord, 99);
+					strncat(newstr, "\n", 99);
+					strcpy(linha, newstr);
+				}
+				fputs(linha, newfp);
+			}
+
+			fclose(newfp);
+			
+		}else
+			printf("Out of range...\n");
+	}else{
+		exit(1);
+	}
+
+	fclose(fp);
 
 	return 0;
 }
 
-void split(char *str, char *strings[], int *lenStrings, char *removeStr){
+void exibeArvore_Letra(arv *ar, char letra){
+	if(ar != NULL){
+		if(ar->info[0] == letra || ar->info[0] == letra+32){
+	 		printf("%c - %s\n", letra, ar->info);
+	 		printf("Linhas: ");
+			exibeLista(ar->l);
+			printf("\n\n");
+		}
+		exibeArvore_Letra(ar->esq, letra);
+		exibeArvore_Letra(ar->dir, letra);
+	}
+}
+
+void split(char *str, char *strings[], int *lenStrings){
 	
 	char *token;
-	char delimiter[100] = " ,.!?;\n";
-	
-	if(!removeStr)
-		removeStr = delimiter;
-	else
-		strncat(removeStr, delimiter, 99);
 
-
-	token = strtok(str, removeStr);
+	token = strtok(str, " ,.\n");
 	
 	for(int i = 0; (token != NULL); ++i){
+		
 		strings[i] = token;
 		*lenStrings = *lenStrings+1;
 
-		token = strtok(NULL, removeStr);	
+		token = strtok(NULL, " ,.\n");	
 	}
 }
 
