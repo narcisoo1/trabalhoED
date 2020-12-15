@@ -102,10 +102,8 @@ int main(int argc, char *argv[]){
 						int quantidade = 0;
 						quantidade=qtdWord(ar,buscaWord);
 						if (quantidade > 1){
-							printf("\n\nDeletando numero da lista!!");
 							deletaNumList(&ar,buscaWord,line);
 						}else{
-							printf("\n\nDeletando nó da árvore!!");
 							ar=deletaNo(ar,buscaWord);
 						}
 
@@ -134,14 +132,6 @@ int main(int argc, char *argv[]){
 	}else{
 		exit(1);
 	}
-
-
-
-	for(int i = 'A'; i <= 'Z'; ++i){//Exibe palavras em ordem alfabética
-		exibeArvore_Letra(ar, i);
-	}
-
-
 
 	fclose(fp);
 
