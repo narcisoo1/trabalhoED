@@ -25,6 +25,9 @@ lista* insereLista(lista *l, const int linha);
 void BuscaPalavra_ExibeCaminho(arv *ar, char *palavra);
 void split(char *str, char *strings[], int *lenStrings);
 void exibeArvore_Letra(arv *ar, char letra);
+void deletaNumList (arv** ar, char* word, int linha);
+arv* deletaNo (arv* ar, char* word);
+int qtdWord(arv *ar, char* word);
 
 int main(int argc, char *argv[]){
 
@@ -95,6 +98,17 @@ int main(int argc, char *argv[]){
 					i--;
 				}else if(i == line-1){ //Linha que a palavra supostamente existe
 					if(strstr(linha, buscaWord)){ //Se a palavra existe na string
+						//atualiza na arvore após a remoção
+						int quantidade = 0;
+						quantidade=qtdWord(ar,buscaWord);
+						if (quantidade > 1){
+							printf("\n\nDeletando numero da lista!!");
+							deletaNumList(&ar,buscaWord,line);
+						}else{
+							printf("\n\nDeletando nó da árvore!!");
+							ar=deletaNo(ar,buscaWord);
+						}
+
 						lenStrings = 0;		
 						split(linha, strings, &lenStrings);
 						char newstr[100] = {};
@@ -103,6 +117,7 @@ int main(int argc, char *argv[]){
 							if(strcmp(strings[j], buscaWord) != 0){
 								strncat(newstr, strings[j], 99);
 								strncat(newstr, " ", 99);
+
 							}
 						}
 						strncat(newstr, "\n", 99);
@@ -119,6 +134,14 @@ int main(int argc, char *argv[]){
 	}else{
 		exit(1);
 	}
+
+
+
+	for(int i = 'A'; i <= 'Z'; ++i){//Exibe palavras em ordem alfabética
+		exibeArvore_Letra(ar, i);
+	}
+
+
 
 	fclose(fp);
 
@@ -206,6 +229,26 @@ void split(char *str, char *strings[], int *lenStrings){
 		token = strtok(NULL, " ,.\n");	
 	}
 }
+int qtdWord(arv *ar, char* word){
+	if(ar != NULL){
+		if(strcmp(ar->info, word) > 0){
+			qtdWord(ar->esq, word);
+		}else if(strcmp(ar->info, word) < 0){
+			qtdWord(ar->dir, word);
+		}else{ //Achou
+			lista *lista;
+			int contador=0;
+			for (lista = ar->l; lista != NULL; lista = lista->prox){
+				contador++;
+			}
+			//printf("\nContador: %d",contador);
+			return contador;
+		}
+	}else{
+		return 0;
+	}
+}
+
 
 void BuscaPalavra_ExibeCaminho(arv *ar, char *palavra){
 	if(ar != NULL){
@@ -281,4 +324,86 @@ void exibeArvore(arv *ar){
 		exibeArvore(ar->esq);
 		exibeArvore(ar->dir);
 	}
+}
+
+void deletaNumList (arv** ar, char* word, int linha){
+	if (ar == NULL){
+		return;
+	}else if (strcmp((*ar)->info, word) > 0){
+	deletaNumList(&(*ar)->esq, word,linha);
+	}else if (strcmp((*ar)->info, word) < 0){
+		deletaNumList(&(*ar)->dir, word,linha);
+	}
+	else {//achou o nó a remover numero da lista
+		    // Store head node 
+		lista* temp = (*ar)->l; 
+		lista* prev = NULL; 
+		
+		// If head node itself holds 
+		// the key to be deleted 
+		if (temp != NULL && temp->info == linha) 
+		{ 
+			(*ar)->l = temp->prox;
+			free(temp);
+			return; 
+		} 
+	
+		// Else Search for the key to be deleted,  
+		// keep track of the previous node as we 
+		// need to change 'prev->next' */ 
+		while (temp != NULL && temp->info != linha) 
+		{ 
+			prev = temp; 
+			temp = temp->prox; 
+		} 
+	
+		// Unlink the node from linked list 
+		prev->prox = temp->prox; 
+	
+		// Free memory 
+		free(temp); 
+	}
+	return;
+}
+
+arv* deletaNo (arv* ar, char* word){
+	if (ar == NULL){
+		return NULL;
+	}else if (strcmp(ar->info, word) > 0){
+	ar->esq = deletaNo(ar->esq, word);
+	}else if (strcmp(ar->info, word) < 0){
+		ar->dir = deletaNo(ar->dir, word);
+	}
+	else {// achou o nó a remover
+		// nó sem filhos
+		if (ar->esq == NULL && ar->dir == NULL) {
+			free (ar);
+			ar = NULL;
+		}
+		// nó só tem filho p/ direita
+		else if (ar->esq == NULL) {
+			arv* t = ar;
+			ar = ar->dir;
+			free (t);
+		}
+		// só tem filho p/ esquerda
+		else if (ar->dir == NULL) {
+			arv* t = ar;
+			ar = ar->esq;
+			free (t);
+		}
+		// nó tem os dois filhos
+		else {
+			arv* f = ar->esq;
+			//maior filho da esquerda substitui o no a ser removido
+			while (f->dir != NULL) {
+				f = f->dir;
+			}
+			ar->l=f->l;
+			strcpy(ar->info, f->info); // troca info
+			strcpy(f->info, word);
+			ar->esq = deletaNo(ar->esq,word);//continua para que haja o reset e o retorno null e limpeza do nó mais adiante.
+		}
+	}
+	return ar;
 }
