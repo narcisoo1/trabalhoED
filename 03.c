@@ -325,32 +325,21 @@ void deletaNumList (arv** ar, char* word, int linha){
 		deletaNumList(&(*ar)->dir, word,linha);
 	}
 	else {//achou o nó a remover numero da lista
-		    // Store head node 
 		lista* temp = (*ar)->l; 
 		lista* prev = NULL; 
-		
-		// If head node itself holds 
-		// the key to be deleted 
+
 		if (temp != NULL && temp->info == linha) 
 		{ 
 			(*ar)->l = temp->prox;
 			free(temp);
 			return; 
 		} 
-	
-		// Else Search for the key to be deleted,  
-		// keep track of the previous node as we 
-		// need to change 'prev->next' */ 
 		while (temp != NULL && temp->info != linha) 
 		{ 
 			prev = temp; 
 			temp = temp->prox; 
 		} 
-	
-		// Unlink the node from linked list 
-		prev->prox = temp->prox; 
-	
-		// Free memory 
+		prev->prox = temp->prox;
 		free(temp); 
 	}
 	return;
