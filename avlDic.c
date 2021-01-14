@@ -35,6 +35,7 @@ int maior(int a, int b);
 int altura(PALAVRA *N);
 //INSERE
 PALAVRA *criaArv(char *Palavra);
+PALAVRA *inserirNo(PALAVRA *no, PALAVRA *NOVO, char *info);
 
 
 PALAVRA* criarArv();
@@ -103,7 +104,7 @@ int main(){
 							for(int i =0; i<=contPala; i++){
 								if(buscarPTBR(&(livro[pos].arv), palavraPTBR[i], palavraEnglish,0) == 0){
 									//Palavra PTBR não existir
-									inserirABB(&(livro[pos].arv),criarFolha(palavraPTBR[i], palavraEnglish));
+									livro[pos].arv = inserirNo(livro[pos].arv,criarFolha(palavraPTBR[i], palavraEnglish), palavraEnglish);
 								}
 							}
 							
@@ -496,16 +497,16 @@ PALAVRA *criaArv(char *Palavra) {
 }
 
 // Insere na nó na arvore
-PALAVRA *inserirNo(PALAVRA *no, char *info) {
+PALAVRA *inserirNo(PALAVRA *no, PALAVRA *NOVO, char *info) {
   // Procurar posição correta de inserção
   if (no == NULL)
-    return (criaArv(info));
+    return NOVO;
 
 	int comp = strcmp(no->pt, info);
   if (comp < 0)
-    no->esq = inserirNo(no->esq, info);
+    no->esq = inserirNo(no->esq, NOVO, info);
   else if (comp > 0)
-    no->dir = inserirNo(no->dir, info);
+    no->dir = inserirNo(no->dir, NOVO, info);
   else
     return no;
 
