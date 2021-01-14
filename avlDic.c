@@ -135,7 +135,7 @@ int main(){
 		       		printf("Escolha uma Unidade: ");
 		       		scanf("%d", &uni);
 		       		if(uni >= 0 && uni<qtdUnidades){
-		       			removerABB(&livro[uni].arv, palavraBuscar2);
+		       			livro[uni].arv = deletarNo(livro[uni].arv, palavraBuscar2);
 		       		}else{
 		       			printf("\n -- Unidade não Cadastrada --\n");
 		       		}
@@ -282,18 +282,6 @@ char** processarString(char* string, char* palavraEnglish, int* contPala){
 	return palavraPTBR;	
 }
 
-// void inserirABB(PALAVRA** raiz, PALAVRA* NO){	
-// 	if(*raiz==NULL){
-// 		*raiz = NO;
-// 	}else{
-// 		int comp = strcmp(NO->pt, (*raiz)->pt);
-// 		if( comp < 0)
-// 			inserirABB( &((*raiz)->esq), NO);
-// 		else
-// 			inserirABB( &((*raiz)->dir), NO);
-// 	}
-// }
-
 void addPalavraENG(PALAVRA** raiz, char* palavraEnglish){
 	LISTA* aux;
 	int  flag = 0;
@@ -326,47 +314,7 @@ int buscarPTBR(PALAVRA** raiz, char *palavraBusca, char* palavraEnglish, int fla
 	return find;
 }
 
-// void removerABB(PALAVRA** raiz, char *palavraBusca){
 
-// 	if(* raiz != NULL){
-// 		int comp = strcmp(palavraBusca, (*raiz)->pt);
-// 		if(comp < 0)
-// 			removerABB(&(*raiz)->esq, palavraBusca);
-// 		else if( comp > 0){
-// 			removerABB(&(*raiz)->dir, palavraBusca);
-// 		}else{
-
-// 			PALAVRA* aux;
-// 			PALAVRA* pai = NULL;
-			
-// 			//Eh Folha
-// 			if((*raiz)->dir == NULL && (*raiz)->esq == NULL){
-// 				free(*raiz);
-// 				*raiz = NULL;
-// 			}else if( (*raiz)->esq == NULL ){
-// 				aux = (*raiz)->dir;
-// 				free(*raiz);
-// 				*raiz = aux;
-			
-// 			}else if((*raiz)->dir == NULL){
-// 				aux = (*raiz)->esq;
-// 				free(*raiz);
-// 				*raiz = aux;
-			
-// 			}else if((*raiz)->dir != NULL && (*raiz)->esq != NULL){
-// 				aux = (*raiz)->dir;
-// 				while(aux->esq!= NULL){
-// 					pai = aux;
-// 					aux = aux->esq;
-// 				}
-// 				strcpy((*raiz)->pt,aux->pt);
-// 				(*raiz)->english = aux->english;
-// 				strcpy(aux->pt, palavraBusca);
-// 				removerABB(&(*raiz)->dir, palavraBusca);
-// 			}
-// 		}
-// 	}
-// }
 //#################################################################################################
 
 // Calcula altura
