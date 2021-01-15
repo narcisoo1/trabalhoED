@@ -574,8 +574,8 @@ int main(){
                 inicioInserir = clock();
                 abrirArquivo(nomeArquivo, &uni);
                 fimInserir = clock();
-                tempoInserir = ((fimInserir - inicioInserir) * 1000) / CLOCKS_PER_SEC;
-                printf("Tempo gasto inserindo: %lf \n", tempoInserir);
+                tempoInserir = ((fimInserir - inicioInserir) * 1000000000) / CLOCKS_PER_SEC;
+                printf("Tempo gasto inserindo: %.2fns \n", tempoInserir);
                 break;
             
             case 2:

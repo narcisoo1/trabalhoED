@@ -14,6 +14,7 @@ struct lista{
 
 struct palavra{
 	char pt[50];
+	int altura;
 	list *english;
 	word *esq, *dir;
 };
@@ -43,12 +44,12 @@ list* insereFimLista(list *lista, char *wordEnglish){
 	}
 }
 
-word* criarFolha(char *wordPort, char *wordEnglish){
+word* criarFolha(char *palavraPT, char *wordEnglish){
 	word* novoNo = (word*) malloc(sizeof(word));
 	novoNo->esq = NULL;
 	novoNo->dir = NULL;
 	novoNo->english = (list*) malloc(sizeof(list));;
-	strcpy(novoNo->pt,wordPort);
+	strcpy(novoNo->pt,palavraPT);
 	novoNo->english = insereFimLista(novoNo->english, wordEnglish);
 	return novoNo;
 }
@@ -57,13 +58,15 @@ list *criarLista(){
 	return NULL;
 }
 
-void printABB(word* raiz){
+
+
+void printAVL(word* raiz){
 	if( raiz != NULL){
 		printf("<");
 		printf("%s ",raiz->pt );
 		printLista(raiz->english);
-		printABB(raiz->esq);
-		printABB(raiz->dir);
+		printAVL(raiz->esq);
+		printAVL(raiz->dir);
 		printf(">");
 	}
 }
@@ -90,36 +93,24 @@ char** processarString(char* string, char* wordEnglish, int* contPala){
 		if(string[x]==',') 
 			qtd++;
 	}
-	char** wordPortugues = (char**) malloc(qtd * sizeof(char*));
+	char** palavraPTBR = (char**) malloc(qtd * sizeof(char*));
 	for(int x=0; x < qtd; x++)
-		wordPortugues[x] = (char*) malloc(sizeof(char));
+		palavraPTBR[x] = (char*) malloc(sizeof(char));
 
 	//adiciono as palavras na matriz alocada
 	for(; string[i]!='\0'; i++){
 		if(string[i] != ','){
-			wordPortugues[ (*contPala) ][ pos++] = string[i];
+			palavraPTBR[ (*contPala) ][ pos++] = string[i];
 		}else{
-			wordPortugues[*contPala][pos] = '\0';
+			palavraPTBR[*contPala][pos] = '\0';
 			(*contPala)++;
 			pos=0;
 		}
 		if(string[i+1]=='\0'){
-			wordPortugues[*contPala][pos] = '\0';
+			palavraPTBR[*contPala][pos] = '\0';
 		}
 	}
-	return wordPortugues;	
-}
-
-void insereABB(word** raiz, word* NO){	
-	if(*raiz==NULL){
-		*raiz = NO;
-	}else{
-		int comp = strcmp(NO->pt, (*raiz)->pt);
-		if( comp < 0)
-			insereABB( &((*raiz)->esq), NO);
-		else
-			insereABB( &((*raiz)->dir), NO);
-	}
+	return palavraPTBR;	
 }
 
 void addWordENG(word** raiz, char* wordEnglish){
@@ -154,47 +145,174 @@ int buscaPT(word** raiz, char *buscaWord, char* wordEnglish, int flag){
 	return find;
 }
 
-void removeABB(word** raiz, char *buscaWord){
 
-	if(* raiz != NULL){
-		int comp = strcmp(buscaWord, (*raiz)->pt);
-		if(comp < 0)
-			removeABB(&(*raiz)->esq, buscaWord);
-		else if( comp > 0){
-			removeABB(&(*raiz)->dir, buscaWord);
-		}else{
+//#################################################################################################
 
-			word* aux;
-			word* pai = NULL;
-			
-			//Eh Folha
-			if((*raiz)->dir == NULL && (*raiz)->esq == NULL){
-				free(*raiz);
-				*raiz = NULL;
-			}else if( (*raiz)->esq == NULL ){
-				aux = (*raiz)->dir;
-				free(*raiz);
-				*raiz = aux;
-			
-			}else if((*raiz)->dir == NULL){
-				aux = (*raiz)->esq;
-				free(*raiz);
-				*raiz = aux;
-			
-			}else if((*raiz)->dir != NULL && (*raiz)->esq != NULL){
-				aux = (*raiz)->dir;
-				while(aux->esq!= NULL){
-					pai = aux;
-					aux = aux->esq;
-				}
-				strcpy((*raiz)->pt,aux->pt);
-				(*raiz)->english = aux->english;
-				strcpy(aux->pt, buscaWord);
-				removeABB(&(*raiz)->dir, buscaWord);
-			}
-		}
-	}
+// Calcula altura
+int altura(word *N) {
+  if (N == NULL)
+    return 0;
+  return N->altura;
 }
+
+int maior(int a, int b) {
+  return (a > b) ? a : b;
+}
+
+// Rotação para direita
+word *dr(word *y) {
+  word *x = y->esq;
+  word *T2 = x->dir;
+
+  x->dir = y;
+  y->esq = T2;
+
+  y->altura = maior(altura(y->esq), altura(y->dir)) + 1;
+  x->altura = maior(altura(x->esq), altura(x->dir)) + 1;
+
+  return x;
+}
+
+// Rotação para esquerda
+word *er(word *x) {
+  word *y = x->dir;
+  word *T2 = y->esq;
+
+  y->esq = x;
+  x->dir = T2;
+
+  x->altura = maior(altura(x->esq), altura(x->dir)) + 1;
+  y->altura = maior(altura(y->esq), altura(y->dir)) + 1;
+
+  return y;
+}
+
+// Verifica valor do balançeamento
+int pegaBalan(word *N) {
+  if (N == NULL)
+    return 0;
+  return altura(N->esq) - altura(N->dir);
+}
+
+word *menorNo(word *no) {
+  word *current = no;
+
+  while (current->esq != NULL)
+    current = current->esq;
+
+  return current;
+}
+
+// Deletar nó
+word *deletarNo(word *raiz, char *buscaWord){
+  // Localizar o nó e deletar
+  if (raiz == NULL)
+    return raiz;
+
+	int comp = strcmp(buscaWord, raiz->pt);
+  
+  if (comp < 0)
+    raiz->esq = deletarNo(raiz->esq, buscaWord);
+
+  else if (comp > 0)
+    raiz->dir = deletarNo(raiz->dir, buscaWord);
+
+  else {
+
+
+    if ((raiz->esq == NULL) || (raiz->dir == NULL)) {
+      word *temp = raiz->esq ? raiz->esq : raiz->dir;
+
+      if (temp == NULL) {
+        temp = raiz;
+        raiz = NULL;
+      } else
+        *raiz = *temp;
+      free(temp);
+    } else {
+      word *temp = menorNo(raiz->dir);
+
+      strcpy(raiz->pt, temp->pt);
+
+      raiz->dir = deletarNo(raiz->dir, temp->pt);
+    }
+  }
+
+  if (raiz == NULL)
+    return raiz;
+
+  // Atualiza o fator do balanceamento
+  // Balancea a arvore
+  raiz->altura = 1 + maior(altura(raiz->esq),
+               altura(raiz->dir));
+
+  int balanceamento = pegaBalan(raiz);
+  if (balanceamento > 1 && pegaBalan(raiz->esq) >= 0)
+    return dr(raiz);
+
+  if (balanceamento > 1 && pegaBalan(raiz->esq) < 0) {
+    raiz->esq = er(raiz->esq);
+    return dr(raiz);
+  }
+
+  if (balanceamento < -1 && pegaBalan(raiz->dir) <= 0)
+    return er(raiz);
+
+  if (balanceamento < -1 && pegaBalan(raiz->dir) > 0) {
+    raiz->dir = dr(raiz->dir);
+    return er(raiz);
+  }
+
+  return raiz;
+}
+
+word *criaArv(char *Palavra) {
+  word *no = (word *) malloc(sizeof(word));
+  strcpy(no->pt, Palavra);
+  no->esq = NULL;
+  no->dir = NULL;
+  no->altura = 1;
+  return (no);
+}
+
+// Insere na nó na arvore
+word *inserirNo(word *no, word *NOVO, char *info) {
+  // Procurar posição correta de inserção
+  if (no == NULL)
+    return NOVO;
+
+	int comp = strcmp(no->pt, info);
+  if (comp < 0)
+    no->esq = inserirNo(no->esq, NOVO, info);
+  else if (comp > 0)
+    no->dir = inserirNo(no->dir, NOVO, info);
+  else
+    return no;
+
+  // Atualiza o fator do balanceamento
+  // Balancea a arvore
+  no->altura = 1 + maior(altura(no->esq),altura(no->dir));
+  int balanceamento = pegaBalan(no);
+  // <0
+  if (balanceamento > 1 && (strcmp(info, no->esq->pt) > 0))
+    return dr(no);
+							// > 0
+  if (balanceamento < -1 && (strcmp(info, no->dir->pt) < 0))
+    return er(no);
+							// > 0
+  if (balanceamento > 1 && (strcmp(info, no->esq->pt) < 0)) {
+    no->esq = er(no->esq);
+    return dr(no);
+  }
+
+  if (balanceamento < -1 && (strcmp(info, no->dir->pt) > 0)) {
+    no->dir = dr(no->dir);
+    return er(no);
+  }
+
+  return no;
+}
+
 
 int main(){
 
@@ -214,7 +332,7 @@ int main(){
 		printf("3 - Buscar Palavra PTBR\n"); 	
 		printf("4 - Exibir Unidade\n");			
 		printf("0 - SAIR\n");
-		printf("\nEscolha uma Opção: ");
+		printf("Escolha uma Opção: ");
 		scanf("%d", &op);
 	    switch(op){
 	    	case 1:
@@ -242,12 +360,12 @@ int main(){
 						}else{
 							int contPala = 0, pos = (qtdUnidades)-1;
 							char wordEnglish[50];
-							char** wordPortugues  = processarString(linha, wordEnglish, &contPala);
+							char** palavraPTBR  = processarString(linha, wordEnglish, &contPala);
 							
 							for(int i =0; i<=contPala; i++){
-								if(buscaPT(&(livro[pos].arv), wordPortugues[i], wordEnglish,0) == 0){
+								if(buscaPT(&(livro[pos].arv), palavraPTBR[i], wordEnglish,0) == 0){
 									//Palavra PTBR não existir
-									insereABB(&(livro[pos].arv),criarFolha(wordPortugues[i], wordEnglish));
+									livro[pos].arv = inserirNo(livro[pos].arv,criarFolha(palavraPTBR[i], wordEnglish), wordEnglish);
 								}
 							}
 							
@@ -265,20 +383,20 @@ int main(){
 	    	
 	    	case 2:
 	    		printf("Informe a palavra em PTBR: ");
-	    		char wordSearch2[50];
-	    		scanf("%s", wordSearch2);
+	    		char palavraBuscar2[50];
+	    		scanf("%s", palavraBuscar2);
 
 	    		if(qtdUnidades == 0){
 	       			printf("\n -- Nenhuma unidade cadastrada --\n");
 	       		}else{
-		       		printf("LISTA DE UNIDADES:\n");
+		       		printf("list DE UNIDADES:\n");
 		       		for(int x = 0; x<qtdUnidades; x++){
 		       			printf("[%d] - %s\n",x, livro[x].nome );
 		       		}
 		       		printf("Escolha uma Unidade: ");
 		       		scanf("%d", &uni);
 		       		if(uni >= 0 && uni<qtdUnidades){
-		       			removeABB(&livro[uni].arv, wordSearch2);
+		       			livro[uni].arv = deletarNo(livro[uni].arv, palavraBuscar2);
 		       		}else{
 		       			printf("\n -- Unidade não Cadastrada --\n");
 		       		}
@@ -287,21 +405,21 @@ int main(){
 	      	
 	      	case 3:
 	      		printf("Informe a palavra em PTBR: ");
-	    		char wordSearch[50];
-	    		scanf("%s", wordSearch);
+	    		char palavraBuscar[50];
+	    		scanf("%s", palavraBuscar);
 	    		
 				if(qtdUnidades != 0){
 					inicioBusca = clock();
 					for(int x = 0; x<qtdUnidades; x++){		
 						printf("\nUnidade [%s]: \n",livro[x].nome );
-						if(buscaPT(&(livro[x].arv), wordSearch, "None",1) == 0)
+						if(buscaPT(&(livro[x].arv), palavraBuscar, "None",1) == 0)
 							printf(" -- Palavra não encontrada --\n");
 
 						printf("\n");
 					}
 					fimBusca = clock();
 					tempoBusca = ((fimBusca - inicioBusca) * 1000000000) / CLOCKS_PER_SEC;
-					printf("Tempo gasto para BUSCAR: %lf \n", tempoBusca);
+					printf("Tempo gasto para BUSCAR: %.2f \n", tempoBusca);
 				}else{
 					printf("\n -- Nenhuma unidade cadastrada --\n");
 				}
@@ -320,7 +438,7 @@ int main(){
 					printf("Escolha uma Unidade: ");
 		       		scanf("%d", &uni);
 		       		if(uni >= 0 && uni<qtdUnidades){
-		       			printABB(livro[uni].arv);
+		       			printAVL(livro[uni].arv);
 		       		}else{
 						printf("\n -- Unidade não Cadastrada --\n");
 					}
@@ -337,7 +455,4 @@ int main(){
 	}
 	return 0;
 }
-
-
-
 
